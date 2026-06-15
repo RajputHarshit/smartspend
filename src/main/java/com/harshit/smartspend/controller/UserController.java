@@ -1,4 +1,4 @@
-package com.harshit.smartspend;
+package com.harshit.smartspend.controller;
 
 import com.harshit.smartspend.dto.RegisterRequestDto;
 import com.harshit.smartspend.entity.User;
