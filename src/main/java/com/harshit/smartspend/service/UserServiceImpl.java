@@ -1,6 +1,7 @@
 package com.harshit.smartspend.service;
 
 import com.harshit.smartspend.dto.RegisterRequestDto;
+import com.harshit.smartspend.dto.RegisterResponseDto;
 import com.harshit.smartspend.entity.User;
 import com.harshit.smartspend.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -15,12 +16,19 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User registerUser(RegisterRequestDto dto) {
-        User user = User.builder().name(dto.getName())
+    public RegisterResponseDto registerUser(RegisterRequestDto dto) {
+        User user = User.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
                 .password(dto.getPassword()).build();
-        return userRepository.save(user);
+        User savedUser= userRepository.save(user);
+
+        return RegisterResponseDto
+                .builder().id(savedUser.getId())
+                .name(savedUser.getName())
+                .email(savedUser.getEmail())
+                .createdAt(savedUser.getCreatedAt())
+                .build();
 
     }
 }

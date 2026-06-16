@@ -1,6 +1,7 @@
 package com.harshit.smartspend.controller;
 
 import com.harshit.smartspend.dto.RegisterRequestDto;
+import com.harshit.smartspend.dto.RegisterResponseDto;
 import com.harshit.smartspend.entity.User;
 import com.harshit.smartspend.service.UserService;
 import com.harshit.smartspend.service.UserServiceImpl;
@@ -21,8 +22,8 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody RegisterRequestDto dto){
-        User user =userService.registerUser(dto);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+    public ResponseEntity<RegisterResponseDto> registerUser(@RequestBody RegisterRequestDto dto){
+        RegisterResponseDto registerResponseDto =userService.registerUser(dto);
+        return new ResponseEntity<>(registerResponseDto, HttpStatus.CREATED);
     }
 }
