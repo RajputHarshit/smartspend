@@ -8,4 +8,6 @@ import org.springframework.stereotype.Service;
 
 public interface UserService {
    RegisterResponseDto registerUser(RegisterRequestDto dto);
+
+   Long getUserIdByEmail(String email);
 }

@@ -3,9 +3,13 @@ package com.harshit.smartspend.controller;
 import com.harshit.smartspend.dto.TransactionRequestDto;
 import com.harshit.smartspend.dto.TransactionResponseDto;
 import com.harshit.smartspend.service.TransactionService;
+import com.harshit.smartspend.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,15 +19,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionController {
     private final TransactionService transactionService;
-
+    private final UserService userService;
     @PostMapping
-    public ResponseEntity<TransactionResponseDto> createTransaction(@RequestBody TransactionRequestDto requestDto) {
+    public ResponseEntity<TransactionResponseDto> createTransaction(@Valid @RequestBody TransactionRequestDto requestDto) {
         TransactionResponseDto response = transactionService.createTransaction(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<TransactionResponseDto>> getTransactionsByUser(@PathVariable Long userId) {
+    @GetMapping("/user/my")
+    public ResponseEntity<List<TransactionResponseDto>> getTransactionsByUser( @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId= userService.getUserIdByEmail(userDetails.getUsername());
         List<TransactionResponseDto> response = transactionService.getTransactionsByUser(userId);
         return ResponseEntity.ok(response);
     }

@@ -5,6 +5,7 @@ import com.harshit.smartspend.dto.RegisterResponseDto;
 import com.harshit.smartspend.entity.User;
 import com.harshit.smartspend.service.UserService;
 import com.harshit.smartspend.service.UserServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponseDto> registerUser(@RequestBody RegisterRequestDto dto){
+    public ResponseEntity<RegisterResponseDto> registerUser(@Valid @RequestBody RegisterRequestDto dto){
         RegisterResponseDto registerResponseDto =userService.registerUser(dto);
         return new ResponseEntity<>(registerResponseDto, HttpStatus.CREATED);
     }

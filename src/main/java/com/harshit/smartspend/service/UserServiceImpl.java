@@ -33,4 +33,11 @@ public class UserServiceImpl implements UserService{
                 .build();
 
     }
+
+    @Override
+    public Long getUserIdByEmail(String email) {
+        User user =userRepository.findByEmail(email).orElseThrow(()->
+                new RuntimeException("User is not found with email "+email));
+        return user.getId();
+    }
 }
