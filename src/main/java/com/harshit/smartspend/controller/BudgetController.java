@@ -22,8 +22,9 @@ public class BudgetController {
     private final BudgetService budgetService;
     private final UserService userService;
     @PostMapping
-    public ResponseEntity<BudgetResponseDto> createBudget(@Valid @RequestBody BudgetRequestDto request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(budgetService.createBudget(request));
+    public ResponseEntity<BudgetResponseDto> createBudget(@Valid @RequestBody BudgetRequestDto request,@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId=userService.getUserIdByEmail(userDetails.getUsername());
+        return ResponseEntity.status(HttpStatus.CREATED).body(budgetService.createBudget(userId,request));
     }
 
     @GetMapping("/user/my")

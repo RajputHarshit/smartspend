@@ -21,8 +21,9 @@ public class TransactionController {
     private final TransactionService transactionService;
     private final UserService userService;
     @PostMapping
-    public ResponseEntity<TransactionResponseDto> createTransaction(@Valid @RequestBody TransactionRequestDto requestDto) {
-        TransactionResponseDto response = transactionService.createTransaction(requestDto);
+    public ResponseEntity<TransactionResponseDto> createTransaction(@Valid @RequestBody TransactionRequestDto requestDto, @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId= userService.getUserIdByEmail(userDetails.getUsername());
+        TransactionResponseDto response = transactionService.createTransaction(userId,requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

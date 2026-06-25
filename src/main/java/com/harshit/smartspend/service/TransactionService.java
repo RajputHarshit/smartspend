@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface TransactionService {
 
-    TransactionResponseDto createTransaction(TransactionRequestDto requestDto);
+    TransactionResponseDto createTransaction(Long userId, TransactionRequestDto requestDto);
     List<TransactionResponseDto> getTransactionsByUser(Long userId);
 }

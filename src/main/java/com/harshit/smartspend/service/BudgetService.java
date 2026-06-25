@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface BudgetService {
 
-    BudgetResponseDto createBudget(BudgetRequestDto budgetRequestDto);
+    BudgetResponseDto createBudget(Long userId,BudgetRequestDto budgetRequestDto);
 
     List<BudgetResponseDto> getBudgetsByUserId(Long userId);
 }

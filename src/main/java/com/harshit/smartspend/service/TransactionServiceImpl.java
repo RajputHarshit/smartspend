@@ -26,9 +26,9 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    public TransactionResponseDto createTransaction(TransactionRequestDto requestDto) {
-        User user = userRepository.findById(requestDto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found: " + requestDto.getUserId()));
+    public TransactionResponseDto createTransaction(Long userId,TransactionRequestDto requestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
         Category category = categoryRepository.findById(requestDto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found: " + requestDto.getCategoryId()));

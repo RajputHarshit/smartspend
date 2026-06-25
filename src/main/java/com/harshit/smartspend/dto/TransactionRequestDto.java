@@ -23,8 +23,8 @@ public class TransactionRequestDto {
 
     private String note; // stays optional, no annotation
 
-    @NotNull(message = "User ID is required")
-    private Long userId;
+//    @NotNull(message = "User ID is required")
+//    private Long userId;
 
     @NotNull(message = "Category ID is required")
     private Long categoryId;

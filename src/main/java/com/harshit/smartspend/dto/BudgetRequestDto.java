@@ -19,8 +19,8 @@ public class BudgetRequestDto {
     @NotBlank(message = "Month year is required")
     private String monthYear;
 
-    @NotNull(message = "User ID is required")
-    private Long userId;
+//    @NotNull(message = "User ID is required")
+//    private Long userId;
 
     @NotNull(message = "Category ID is required")
     private Long categoryId;
