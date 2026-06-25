@@ -1,0 +1,12 @@
+services:
+  redis:
+    image: redis
+    container_name: smartspend-redis
+    ports:
+      - "6379:6379"
+
+  kafka:
+    image: apache/kafka
+    container_name: smartspend-kafka
+    ports:
+      - "9092:9092"
