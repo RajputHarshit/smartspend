@@ -29,7 +29,7 @@ public class BudgetServiceImpl implements BudgetService {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not Found"));
         Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
 
-        boolean duplicate = budgetRepository.gitexistsByUserIdAndCategoryIdAndMonthYear(userId, request.getCategoryId(), request.getMonthYear());
+        boolean duplicate = budgetRepository.existsByUserIdAndCategoryIdAndMonthYear(userId, request.getCategoryId(), request.getMonthYear());
         if (duplicate) {
             throw new RuntimeException("Budget already exists for this category and month");
         }
