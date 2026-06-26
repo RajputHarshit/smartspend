@@ -11,6 +11,7 @@ import com.harshit.smartspend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
@@ -47,7 +48,7 @@ public class BudgetServiceImpl implements BudgetService {
     public List<BudgetResponseDto> getBudgetsByUserId(Long userId) {
 
         return budgetRepository.findByUserId(userId).stream()
-                .map(this::mapToResponse).toList();
+                .map(this::mapToResponse).collect(Collectors.toList());
 
     }
 

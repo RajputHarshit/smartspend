@@ -8,6 +8,8 @@ import com.harshit.smartspend.entity.User;
 import com.harshit.smartspend.repository.CategoryRepository;
 import com.harshit.smartspend.repository.TransactionRepository;
 import com.harshit.smartspend.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +28,7 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    @CacheEvict(value = "transactions", key = "#userId")
     public TransactionResponseDto createTransaction(Long userId,TransactionRequestDto requestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
@@ -44,6 +47,7 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    @Cacheable(value = "transactions",  key="#userId")
     public List<TransactionResponseDto> getTransactionsByUser(Long userId) {
         return transactionRepository.findByUserId(userId)
                 .stream()
