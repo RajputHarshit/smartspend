@@ -8,6 +8,8 @@ import com.harshit.smartspend.entity.User;
 import com.harshit.smartspend.repository.BudgetRepository;
 import com.harshit.smartspend.repository.CategoryRepository;
 import com.harshit.smartspend.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +28,7 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     @Override
+    @CacheEvict(value = "budgets", key = "#userId")
     public BudgetResponseDto createBudget(Long userId,BudgetRequestDto request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not Found"));
         Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
@@ -45,6 +48,7 @@ public class BudgetServiceImpl implements BudgetService {
 
 
     @Override
+    @Cacheable(value = "budgets",  key="#userId")
     public List<BudgetResponseDto> getBudgetsByUserId(Long userId) {
 
         return budgetRepository.findByUserId(userId).stream()
