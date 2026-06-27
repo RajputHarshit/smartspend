@@ -2,7 +2,9 @@ package com.harshit.smartspend.consumer;
 
 import com.harshit.smartspend.dto.TransactionEventDto;
 import com.harshit.smartspend.entity.Budget;
+import com.harshit.smartspend.entity.Notification;
 import com.harshit.smartspend.repository.BudgetRepository;
+import com.harshit.smartspend.repository.NotificationRepository;
 import com.harshit.smartspend.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.util.Optional;
 public class BudgetAlertConsumer {
     private final BudgetRepository budgetRepository;
     private final TransactionRepository transactionRepository;
+    private final NotificationRepository notificationRepository;
 
     @KafkaListener(topics = "transaction-created-topic", groupId = "smartspend-group")
     public void handleTransactionEvent(TransactionEventDto event){
@@ -42,6 +45,15 @@ public class BudgetAlertConsumer {
                 .multiply(BigDecimal.valueOf(100));
 
         if (percentageUsed.compareTo(BigDecimal.valueOf(80)) >= 0) {
+
+         Notification newAlert =  new Notification();
+            newAlert.setUserId(event.getUserId());
+            newAlert.setMessage("ALERT: User " + event.getUserId() +
+                    " has used " + percentageUsed + "% of budget for category " +
+                    event.getCategoryId() + " in " + event.getMonthYear());
+            newAlert.setRead(false);
+
+         notificationRepository.save(newAlert);
             System.out.println("ALERT: User " + event.getUserId() +
                     " has used " + percentageUsed + "% of budget for category " +
                     event.getCategoryId() + " in " + event.getMonthYear());
