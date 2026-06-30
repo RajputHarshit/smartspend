@@ -1,5 +1,6 @@
 package com.harshit.smartspend.controller;
 
+import com.harshit.smartspend.dto.MonthlyInsightResponse;
 import com.harshit.smartspend.service.AiInsightService;
 import com.harshit.smartspend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,8 @@ public class AiInsightController {
     private final UserService userService;
 
     @GetMapping("/monthly")
-    public String getMonthlyInsight(@AuthenticationPrincipal UserDetails userDetails,
-                                    @RequestParam (required = false) String monthYear) {
+    public MonthlyInsightResponse getMonthlyInsight(@AuthenticationPrincipal UserDetails userDetails,
+                                                    @RequestParam (required = false) String monthYear) {
         Long userId=userService.getUserIdByEmail(userDetails.getUsername());
         if(monthYear==null){
             monthYear= YearMonth.now().toString();

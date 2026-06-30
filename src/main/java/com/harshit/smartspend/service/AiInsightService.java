@@ -1,6 +1,7 @@
 package com.harshit.smartspend.service;
 
 import com.harshit.smartspend.dto.CategorySpendingInsight;
+import com.harshit.smartspend.dto.MonthlyInsightResponse;
 import com.harshit.smartspend.entity.Budget;
 import com.harshit.smartspend.repository.BudgetRepository;
 import com.harshit.smartspend.repository.TransactionRepository;
@@ -69,17 +70,25 @@ public class AiInsightService {
         return sb.toString();
     }
 
-    public String generateMonthlyInsight(Long userId, String monthYear) {
+    public MonthlyInsightResponse generateMonthlyInsight(Long userId, String monthYear) {
         List<CategorySpendingInsight> insights = getMonthlySpendingSummary(userId, monthYear);
         String promptText = buildPromptText(insights);
 
         return chatClient.prompt()
-                .system("You are a friendly personal finance assistant. Give a short, encouraging 2-3 sentence summary of the user's spending based on the data provided.")
-                .options(GoogleGenAiChatOptions.builder()
+                .system("""
+    You are a financial assistant. Analyze the user's monthly spending data
+    and respond with a structured JSON summary containing exactly these fields:
+    
+    - summary: A short, encouraging 2-3 sentence overview of the user's spending this month.
+    - topSpendingCategory: The single category name where the user spent the most money.
+    - overBudgetCategories: A list of category names where spending exceeded the budget limit. 
+      If none are over budget, return an empty list.
+    - recommendation: One practical, friendly suggestion to help the user improve their spending next month.
+    """).options(GoogleGenAiChatOptions.builder()
                         .model("gemini-2.5-flash")
                         .build())
                 .user(promptText)
                 .call()
-                .content();
+                .entity(MonthlyInsightResponse.class);
     }
 }
