@@ -4,12 +4,11 @@ import com.harshit.smartspend.dto.MonthlyInsightResponse;
 import com.harshit.smartspend.service.AiInsightService;
 import com.harshit.smartspend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
 
 import java.time.YearMonth;
 
@@ -27,7 +26,15 @@ public class AiInsightController {
         Long userId=userService.getUserIdByEmail(userDetails.getUsername());
         if(monthYear==null){
             monthYear= YearMonth.now().toString();
-        }// adjust to match how your other controllers pull userId
+        }
         return aiInsightService.generateMonthlyInsight(userId, monthYear);
+    }
+    @PostMapping(value = "/ask", consumes = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> askAboutBudget(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody String question) {
+        Long userId=userService.getUserIdByEmail(userDetails.getUsername());
+        String answer = aiInsightService.askAboutBudget(userId, question);
+        return ResponseEntity.ok(answer);
     }
 }

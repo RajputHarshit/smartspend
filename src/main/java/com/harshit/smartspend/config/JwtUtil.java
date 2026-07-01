@@ -47,6 +47,7 @@ public class JwtUtil {
         try {
             return extractEmail(token).equals(email) && !isTokenExpired(token);
         } catch (Exception e) {
+
             return false;
         }
     }

@@ -91,4 +91,22 @@ public class AiInsightService {
                 .call()
                 .entity(MonthlyInsightResponse.class);
     }
+    public String askAboutBudget(Long userId, String question) {
+        BudgetStatusTool tool = new BudgetStatusTool(userId, this);
+
+        return chatClient.prompt()
+                .system("""
+                You are a financial assistant. Answer the user's question about their
+                budget. If you need live spending or budget data for a specific
+                category, use the getCategoryBudgetStatus tool. Always specify the
+                month in yyyy-MM format when calling it.
+                """)
+                .options(GoogleGenAiChatOptions.builder()
+                .model("gemini-2.5-flash")
+                .build())
+                .user(question)
+                .tools(tool)
+                .call()
+                .content();
+    }
 }
