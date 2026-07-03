@@ -5,6 +5,7 @@ import com.harshit.smartspend.dto.RegisterResponseDto;
 import com.harshit.smartspend.entity.User;
 import com.harshit.smartspend.service.UserService;
 import com.harshit.smartspend.service.UserServiceImpl;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class UserController {
     public UserController(UserServiceImpl userService) {
         this.userService = userService;
     }
-
+@SecurityRequirements
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDto> registerUser(@Valid @RequestBody RegisterRequestDto dto){
         RegisterResponseDto registerResponseDto =userService.registerUser(dto);
