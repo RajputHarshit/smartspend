@@ -66,4 +66,24 @@ public class BudgetAlertConsumerTest {
         budgetAlertConsumer.handleTransactionEvent(event);
         verify(notificationRepository, times(1)).save(any());
     }
+    @Test
+    public void budgetNotExceededNoNotificationSaved(){
+        Budget budget= new Budget();
+        budget.setLimitAmount(BigDecimal.valueOf(1000));
+        when(budgetRepository.findByUserIdAndCategoryIdAndMonthYear(1L,1L,"2026-06"))
+                .thenReturn(Optional.of(budget));
+        LocalDateTime start = LocalDateTime.of(2026, 6, 1, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 7, 1, 0, 0);
+
+        when(transactionRepository.sumExpensesForUserCategoryInRange(1L, 1L, start, end))
+                .thenReturn(BigDecimal.valueOf(700));
+        TransactionEventDto event = TransactionEventDto.builder()
+                .userId(1L)
+                .categoryId(1L)
+                .amount(BigDecimal.valueOf(500))
+                .monthYear("2026-06")
+                .build();
+        budgetAlertConsumer.handleTransactionEvent(event);
+        verify(notificationRepository, never()).save(any());
+    }
 }
