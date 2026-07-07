@@ -2,6 +2,8 @@ package com.harshit.smartspend.repository;
 
 import com.harshit.smartspend.entity.Category;
 import com.harshit.smartspend.entity.Transaction;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +14,7 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction,Long> {
 
-    List<Transaction> findByUserId(Long userId);
+    Page<Transaction> findByUserId(Long userId, Pageable pageable);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
             "WHERE t.user.id = :userId AND t.category.id = :categoryId " +

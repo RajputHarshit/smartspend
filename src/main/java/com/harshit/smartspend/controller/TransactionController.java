@@ -4,8 +4,13 @@ import com.harshit.smartspend.dto.TransactionRequestDto;
 import com.harshit.smartspend.dto.TransactionResponseDto;
 import com.harshit.smartspend.service.TransactionService;
 import com.harshit.smartspend.service.UserService;
+import com.harshit.smartspend.util.PaginationConstants;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,9 +33,18 @@ public class TransactionController {
     }
 
     @GetMapping("/user/my")
-    public ResponseEntity<List<TransactionResponseDto>> getTransactionsByUser( @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Page<TransactionResponseDto>> getTransactionsByUser( @AuthenticationPrincipal UserDetails userDetails,
+                                                                               @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE) int page,
+                                                                               @RequestParam(defaultValue = PaginationConstants.DEFAULT_SIZE) int size,
+                                                                               @RequestParam(defaultValue = PaginationConstants.DEFAULT_SORT_BY) String sortBy,
+                                                                                   @RequestParam(defaultValue = PaginationConstants.DEFAULT_DIRECTION) String direction) {
         Long userId= userService.getUserIdByEmail(userDetails.getUsername());
-        List<TransactionResponseDto> response = transactionService.getTransactionsByUser(userId);
+        Sort sort = direction.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<TransactionResponseDto> response = transactionService.getTransactionsByUser(userId,pageable);
         return ResponseEntity.ok(response);
     }
 }

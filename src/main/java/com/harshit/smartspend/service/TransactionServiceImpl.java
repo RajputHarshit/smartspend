@@ -12,6 +12,8 @@ import com.harshit.smartspend.repository.TransactionRepository;
 import com.harshit.smartspend.repository.UserRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -65,12 +67,9 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    @Cacheable(value = "transactions",  key="#userId")
-    public List<TransactionResponseDto> getTransactionsByUser(Long userId) {
-        return transactionRepository.findByUserId(userId)
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    @Cacheable(value = "transactions", key = "#userId + '-' + #pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort")
+    public Page<TransactionResponseDto> getTransactionsByUser(Long userId, Pageable pageable) {
+        return transactionRepository.findByUserId(userId,pageable).map(this::mapToResponse);
 
     }
     private TransactionResponseDto mapToResponse(Transaction t) {
