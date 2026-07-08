@@ -10,6 +10,8 @@ import com.harshit.smartspend.repository.CategoryRepository;
 import com.harshit.smartspend.repository.UserRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -54,6 +56,14 @@ public class BudgetServiceImpl implements BudgetService {
         return budgetRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse).collect(Collectors.toList());
 
+    }
+
+    @Override
+    @Cacheable(value = "budgets", key = "#userId + '-' + #pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort")
+    public Page<BudgetResponseDto> getBudgetsByUser(Long userId, Pageable pageable) {
+
+        return budgetRepository.findByUserId(userId, pageable)
+                .map(this::mapToResponse);
     }
 
 
