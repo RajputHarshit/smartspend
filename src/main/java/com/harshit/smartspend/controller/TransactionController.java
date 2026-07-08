@@ -1,5 +1,6 @@
 package com.harshit.smartspend.controller;
 
+import com.harshit.smartspend.dto.PagedResponse;
 import com.harshit.smartspend.dto.TransactionRequestDto;
 import com.harshit.smartspend.dto.TransactionResponseDto;
 import com.harshit.smartspend.service.TransactionService;
@@ -33,7 +34,7 @@ public class TransactionController {
     }
 
     @GetMapping("/user/my")
-    public ResponseEntity<Page<TransactionResponseDto>> getTransactionsByUser( @AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<PagedResponse<TransactionResponseDto>> getTransactionsByUser( @AuthenticationPrincipal UserDetails userDetails,
                                                                                @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE) int page,
                                                                                @RequestParam(defaultValue = PaginationConstants.DEFAULT_SIZE) int size,
                                                                                @RequestParam(defaultValue = PaginationConstants.DEFAULT_SORT_BY) String sortBy,
@@ -44,7 +45,16 @@ public class TransactionController {
                 : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<TransactionResponseDto> response = transactionService.getTransactionsByUser(userId,pageable);
+        Page<TransactionResponseDto> pageResult = transactionService.getTransactionsByUser(userId,pageable);
+
+        PagedResponse<TransactionResponseDto> response = new PagedResponse<>(
+                pageResult.getContent(),
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalElements(),
+                pageResult.getTotalPages(),
+                pageResult.isLast()
+        );
         return ResponseEntity.ok(response);
     }
 }
