@@ -28,4 +28,21 @@ public class GlobalExceptionHandler {
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.badRequest().body(errors);
     }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String,Object>> handleResourceNotFound(ResourceNotFoundException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", 404,
+                "error", e.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(UnauthorizedActionException.class)
+    public ResponseEntity<Map<String,Object>> handleUnauthorizedAction(UnauthorizedActionException e){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", 403,
+                "error", e.getMessage()
+        ));
+    }
 }

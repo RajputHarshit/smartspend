@@ -1,5 +1,6 @@
 package com.harshit.smartspend.service;
 
+import com.harshit.smartspend.dto.PagedResponse;
 import com.harshit.smartspend.dto.TransactionEventDto;
 import com.harshit.smartspend.dto.TransactionRequestDto;
 import com.harshit.smartspend.dto.TransactionResponseDto;
@@ -7,6 +8,8 @@ import com.harshit.smartspend.entity.Category;
 import com.harshit.smartspend.entity.Transaction;
 import com.harshit.smartspend.entity.TransactionType;
 import com.harshit.smartspend.entity.User;
+import com.harshit.smartspend.exceptions.ResourceNotFoundException;
+import com.harshit.smartspend.exceptions.UnauthorizedActionException;
 import com.harshit.smartspend.repository.CategoryRepository;
 import com.harshit.smartspend.repository.TransactionRepository;
 import com.harshit.smartspend.repository.UserRepository;
@@ -18,11 +21,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-public class TransactionServiceImpl implements TransactionService{
+public class TransactionServiceImpl implements TransactionService {
     private TransactionRepository transactionRepository;
     private UserRepository userRepository;
     private CategoryRepository categoryRepository;
@@ -37,8 +38,8 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    @CacheEvict(value = "transactions", key = "#userId")
-    public TransactionResponseDto createTransaction(Long userId,TransactionRequestDto requestDto) {
+    @CacheEvict(value = "transactions", allEntries = true)
+    public TransactionResponseDto createTransaction(Long userId, TransactionRequestDto requestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
@@ -51,7 +52,7 @@ public class TransactionServiceImpl implements TransactionService{
                 .user(user)
                 .category(category)
                 .build();
-       Transaction savedTransaction =transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
         if (savedTransaction.getType() == TransactionType.EXPENSE) {
             TransactionEventDto event = TransactionEventDto.builder()
                     .userId(savedTransaction.getUser().getId())
@@ -68,10 +69,55 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     @Cacheable(value = "transactions", key = "#userId + '-' + #pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort")
-    public Page<TransactionResponseDto> getTransactionsByUser(Long userId, Pageable pageable) {
-        return transactionRepository.findByUserId(userId,pageable).map(this::mapToResponse);
+    public PagedResponse<TransactionResponseDto> getTransactionsByUser(Long userId, Pageable pageable) {
+        Page<TransactionResponseDto> pageResult = transactionRepository.findByUserId(userId, pageable)
+                .map(this::mapToResponse);
 
+        return new PagedResponse<>(
+                pageResult.getContent(),
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalElements(),
+                pageResult.getTotalPages(),
+                pageResult.isLast()
+        );
     }
+
+    @Override
+    @CacheEvict(value = "transactions", allEntries = true)
+    public TransactionResponseDto updateTransaction(Long userId, Long transactionId, TransactionRequestDto requestDto) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found: " + transactionId));
+
+        if (!transaction.getUser().getId().equals(userId)) {
+            throw new UnauthorizedActionException("You are not allowed to update this transaction");
+        }
+
+        Category category = categoryRepository.findById(requestDto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + requestDto.getCategoryId()));
+
+        transaction.setAmount(requestDto.getAmount());
+        transaction.setType(requestDto.getType());
+        transaction.setNote(requestDto.getNote());
+        transaction.setCategory(category);
+
+        Transaction updatedTransaction = transactionRepository.save(transaction);
+        return mapToResponse(updatedTransaction);
+    }
+
+    @Override
+    @CacheEvict(value = "transactions", allEntries = true)
+    public void deleteTransaction(Long userId, Long transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found: " + transactionId));
+
+        if (!transaction.getUser().getId().equals(userId)) {
+            throw new UnauthorizedActionException("You are not allowed to delete this transaction");
+        }
+
+        transactionRepository.delete(transaction);
+    }
+
     private TransactionResponseDto mapToResponse(Transaction t) {
         return TransactionResponseDto.builder()
                 .id(t.getId())
