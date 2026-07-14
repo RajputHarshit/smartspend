@@ -31,4 +31,9 @@ public class User {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'USER'")
+    @Builder.Default
+    private Role role = Role.USER;
 }
