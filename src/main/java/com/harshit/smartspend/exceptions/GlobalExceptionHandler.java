@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -13,36 +14,70 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception e, WebRequest request){
+        e.printStackTrace();
+        ErrorResponse errorResponse = ErrorResponse
+                .builder()
+                .timestamp(LocalDateTime.now())
+                .error("An unexpected error occurred")
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .path(request.getDescription(false))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String,Object>> handleRuntimeException(RuntimeException e){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                "timestamp", LocalDateTime.now(),
-                "status", 400,
-                "error", e.getMessage()
-        ));
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e, WebRequest request){
+        e.printStackTrace();
+        ErrorResponse errorResponse = ErrorResponse
+                .builder()
+                .timestamp(LocalDateTime.now())
+                .error("An unexpected error occurred")
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .path(request.getDescription(false))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex,WebRequest request) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-        return ResponseEntity.badRequest().body(errors);
+        ErrorResponse errorResponse= ErrorResponse
+                .builder()
+                .timestamp(LocalDateTime.now())
+                .error("Validation Failed")
+                .status(HttpStatus.BAD_REQUEST.value())
+                .path(request.getDescription(false))
+                .fieldErrors(errors)
+                .build();
+        return ResponseEntity.badRequest().body(errorResponse);
     }
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String,Object>> handleResourceNotFound(ResourceNotFoundException e){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "timestamp", LocalDateTime.now(),
-                "status", 404,
-                "error", e.getMessage()
-        ));
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException e, WebRequest request){
+        ErrorResponse errorResponse= ErrorResponse
+                .builder()
+                .timestamp(LocalDateTime.now())
+                .error(e.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .path(request.getDescription(false))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @ExceptionHandler(UnauthorizedActionException.class)
-    public ResponseEntity<Map<String,Object>> handleUnauthorizedAction(UnauthorizedActionException e){
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
-                "timestamp", LocalDateTime.now(),
-                "status", 403,
-                "error", e.getMessage()
-        ));
+    public ResponseEntity<ErrorResponse> handleUnauthorizedAction(UnauthorizedActionException e, WebRequest request){
+            ErrorResponse errorResponse= ErrorResponse
+                    .builder()
+                    .timestamp(LocalDateTime.now())
+                    .error(e.getMessage())
+                    .status(HttpStatus.FORBIDDEN.value())
+                    .path(request.getDescription(false))
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 }
