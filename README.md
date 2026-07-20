@@ -23,6 +23,7 @@ SmartSpend is a backend REST API that helps users track income, expenses, and bu
 - 🤖 **AI-powered insights** using Google Gemini (Spring AI) — structured monthly spending summaries and live budget Q&A via function/tool calling
 - 📄 **Fully documented REST API** via Swagger/OpenAPI with JWT Bearer auth support
 - 🛡️ **Layered architecture** (Controller-Service-Repository) with DTO-based request/response separation
+- 🐳 **Fully containerized** — app, Redis, and Kafka all run via a single `docker-compose up`
 
 ## 🛠️ Tech Stack
 
@@ -36,7 +37,7 @@ SmartSpend is a backend REST API that helps users track income, expenses, and bu
 | Messaging | Apache Kafka |
 | AI | Spring AI, Google Gemini (gemini-2.5-flash) |
 | API Docs | Swagger / OpenAPI (springdoc-openapi) |
-| Containerization | Docker |
+| Containerization | Docker, Docker Compose |
 
 ## 🏗️ Architecture
 
@@ -92,10 +93,8 @@ Content-Type: application/json
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Java 21
-- MySQL 8 (installed locally)
-- Docker & Docker Compose (for Redis & Kafka)
-- Maven
+- Docker & Docker Compose
+- MySQL 8 (installed locally — the app connects to your host machine's MySQL from inside its container)
 
 ### Installation
 
@@ -105,27 +104,16 @@ git clone https://github.com/RajputHarshit/smartspend.git
 cd smartspend
 ```
 
-2. Start Redis & Kafka via Docker Compose
+2. Create a `.env` file in the project root with your credentials:
+3. Start everything — app, Redis, and Kafka — with one command:
 ```bash
-docker-compose up -d
-```
-
-3. Configure application properties
-```bash
-copy src\main\resources\application-example.properties src\main\resources\application.properties
-```
-Then update `application.properties` with your MySQL credentials, JWT secret, and Gemini API key.
-
-4. Run the application
-```bash
-./mvnw spring-boot:run
+docker-compose up -d --build
 ```
 
 The API will be available at `http://localhost:8080`
 
 ## 🔮 Future Improvements
 
-- Unit & integration tests (JUnit + Mockito)
-- Global exception handling refinement
-- Pagination on list endpoints
-- Full application Dockerization (currently only Redis & Kafka are containerized)
+- Unit & integration tests (JUnit + Mockito) — expand beyond current `BudgetAlertConsumer` coverage
+- Microservices — split into separate services with real inter-service communication
+- Investigate Docker image size optimization
